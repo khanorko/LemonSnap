@@ -100,7 +100,7 @@ export const getCameraGear = (year: number, advanced?: AdvancedSettings): Camera
   return gear;
 };
 
-const buildPrompt = (stylePrompt: string, year: number = 2025, advanced?: AdvancedSettings): string => {
+export const buildPrompt = (stylePrompt: string, year: number = 2025, advanced?: AdvancedSettings): string => {
   const gear = getCameraGear(year, advanced);
   
   // Determine angle string
@@ -135,37 +135,48 @@ const buildPrompt = (stylePrompt: string, year: number = 2025, advanced?: Advanc
 
   // Period Styling
   let periodStyling = "";
-  if (year < 1900) {
-    periodStyling = `SUBJECT STYLING: Authentic ${year}s era clothing and hairstyle.`;
+  
+  // SAFETY FIX: For 1860-1865 (US Civil War era), explicitly request CIVILIAN clothing
+  // to avoid generating military uniforms which often triggers Sensitive Event/Hate Speech safety filters.
+  if (year >= 1860 && year <= 1865) {
+     periodStyling = `WARDROBE: Authentic 1860s CIVILIAN clothing (Suits/Dresses). STRICTLY NO MILITARY UNIFORMS.`;
+  }
+  else if (year < 1900) {
+    periodStyling = `WARDROBE: Authentic ${year}s era civilian clothing.`;
   } else if (year < 2020) {
-    periodStyling = `SUBJECT STYLING: Authentic fashion and grooming from ${year}.`;
+    periodStyling = `WARDROBE: Authentic fashion from ${year}.`;
   } else if (year > 2030) {
-     periodStyling = `SUBJECT STYLING: Futuristic fashion suitable for ${year}.`;
+     periodStyling = `WARDROBE: Futuristic fashion suitable for ${year}.`;
   } else {
-      periodStyling = `SUBJECT STYLING: Contemporary ${year} fashion.`;
+      periodStyling = `WARDROBE: Contemporary ${year} fashion.`;
   }
 
   // Prehistoric override
   if (year < 1000) {
-      periodStyling = "SUBJECT STYLING: Prehistoric clothing (furs, robes).";
+      periodStyling = "WARDROBE: Prehistoric clothing (furs, robes).";
   }
     
-  // PROMPT STRATEGY: EDITING / STYLE TRANSFER
-  // This phrasing avoids strict "Identity" triggers (deepfakes) by framing it as an image edit.
-  const safeIntro = "Edit the uploaded image to apply the selected style while keeping the same person.";
-  const consentNote = "User confirms rights to this image and consent for style editing.";
-
-  let prompt = `
-  ${consentNote}
+  // PROMPT STRATEGY: Explicit Safety Context
+  // We use the user's specific safety wording to guide the model's content policy check.
   
-  INSTRUCTION: ${safeIntro}
+  let prompt = `
+  CONTEXT AND CONSENT:
+  - Apply the selected visual style to the user-provided image.
+  - The subject is an adult and has consented to editing.
+  - This is not a public figure.
+  - Do not infer identity, age, or name.
+  
+  INSTRUCTION:
+  - Keep the same person and facial features.
+  - Focus on lighting, color, background, and wardrobe only.
+  - Do not create a new face or a new person.
   
   TARGET STYLE:
   ${styleText}
   
   ${periodStyling}
   
-  ADDITIONAL DETAILS: Produce a high-quality styled portrait. Do not add harmful objects, weapons, or dangerous materials. Ensure the lighting and composition match the camera description provided.
+  EXECUTION: High quality, photorealistic style transfer.
   `;
 
   return prompt;

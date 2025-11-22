@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import ImageUploader from './components/ImageUploader';
 import StyleGrid from './components/StyleGrid';
 import YearSelector from './components/YearSelector';
 import ResultModal from './components/ResultModal';
 import { STYLES } from './constants';
-import { generateHeadshot } from './services/gemini';
+import { generateHeadshot, buildPrompt } from './services/gemini';
 import { GeneratedResult, AppMode, AdvancedSettings } from './types';
 
 function App() {
@@ -15,6 +15,7 @@ function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<GeneratedResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   
   // Advanced Settings State
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
@@ -27,6 +28,19 @@ function App() {
 
   const handleMagicEditorClick = () => {
     alert("Magic Editor is currently in beta testing and will be available in the next update! 🍋");
+  };
+
+  // Calculate Live Prompt
+  const livePrompt = useMemo(() => {
+      const style = STYLES.find(s => s.id === selectedStyleId);
+      if (!style) return "Select a style to view the generated prompt...";
+      return buildPrompt(style.desc, year, advancedSettings);
+  }, [selectedStyleId, year, advancedSettings]);
+
+  const handleCopyPrompt = () => {
+    navigator.clipboard.writeText(livePrompt);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleGenerate = async () => {
@@ -168,6 +182,24 @@ function App() {
                 {error}
             </div>
           )}
+          
+          {/* Prompt Inspector - Always Visible for Testing */}
+          <div className="bg-dark-800 border border-dark-700 rounded-xl overflow-hidden">
+              <div className="px-4 py-2 bg-dark-900/50 border-b border-dark-700 flex items-center justify-between">
+                  <span className="text-xs font-bold text-lemon-400 uppercase tracking-wider">Final Prompt (For Testing)</span>
+                  <button 
+                      onClick={handleCopyPrompt}
+                      className="text-xs bg-dark-700 hover:bg-dark-600 text-white px-2 py-1 rounded transition-colors flex items-center gap-1"
+                  >
+                      {copied ? 'Copied!' : 'Copy Text'}
+                  </button>
+              </div>
+              <div className="p-4 bg-black/30 relative group">
+                  <pre className="text-xs text-gray-300 font-mono whitespace-pre-wrap break-words max-h-48 overflow-y-auto custom-scrollbar">
+                      {livePrompt}
+                  </pre>
+              </div>
+          </div>
 
           {/* Generate Button */}
           <button
