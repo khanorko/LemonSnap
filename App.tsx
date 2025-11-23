@@ -2,14 +2,18 @@ import React, { useState, useMemo } from 'react';
 import ImageUploader from './components/ImageUploader';
 import StyleGrid from './components/StyleGrid';
 import YearSelector from './components/YearSelector';
+import ExpressionSelector from './components/ExpressionSelector';
 import ResultModal from './components/ResultModal';
+import GalleryModal from './components/GalleryModal';
 import { STYLES } from './constants';
 import { generateHeadshot, buildPrompt } from './services/gemini';
 import { GeneratedResult, AppMode, AdvancedSettings } from './types';
+import { uploadHeadshot, dataURLToBlob } from './services/storage';
 
 function App() {
   const [mode, setMode] = useState<AppMode>('headshot');
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [showGallery, setShowGallery] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [selectedStyleId, setSelectedStyleId] = useState<string | null>(null);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [isGenerating, setIsGenerating] = useState(false);
@@ -20,10 +24,12 @@ function App() {
   // Advanced Settings State
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     angle: 'default',
+    camera: 'default',
     lens: 'default',
     aperture: 'default',
     lighting: 'default',
-    filmStock: 'default'
+    filmStock: 'default',
+    expression: 'neutral'
   });
 
   const handleMagicEditorClick = () => {
@@ -44,8 +50,8 @@ function App() {
   };
 
   const handleGenerate = async () => {
-    if (!uploadedFile) {
-        setError("Please upload an image first.");
+    if (uploadedFiles.length === 0) {
+        setError("Please upload at least one image.");
         return;
     }
     
@@ -66,7 +72,18 @@ function App() {
       styleTitle = style.title;
       
       // Pass advanced settings and selected year to generator
-      imageUrl = await generateHeadshot(uploadedFile, style.desc, year, advancedSettings);
+      imageUrl = await generateHeadshot(uploadedFiles, style.desc, year, advancedSettings);
+
+      // Upload to R2 Gallery
+      try {
+          const blob = dataURLToBlob(imageUrl);
+          const filename = `headshot_${Date.now()}_${style.id}.png`;
+          await uploadHeadshot(blob, filename);
+          console.log("Image saved to gallery:", filename);
+      } catch (uploadErr) {
+          console.error("Failed to save to gallery:", uploadErr);
+          // Don't block the UI, just log the error
+      }
 
       setResult({
         id: Date.now().toString(),
@@ -110,7 +127,12 @@ function App() {
             <span className="font-bold text-xl tracking-tight"><span className="text-white">Lemon</span><span className="text-lemon-400">Snap</span></span>
           </div>
           <div className="flex items-center gap-4">
-             <button className="text-sm text-gray-400 hover:text-white transition-colors">My Gallery</button>
+             <button 
+               onClick={() => setShowGallery(true)}
+               className="text-sm text-gray-400 hover:text-white transition-colors"
+             >
+               My Gallery
+             </button>
              <div className="w-px h-4 bg-white/20"></div>
              <div className="flex items-center gap-1 text-lemon-400 text-sm font-medium">
                 <span>50 Credits</span>
@@ -150,8 +172,8 @@ function App() {
 
         {/* Upload Section */}
         <ImageUploader 
-          onUpload={setUploadedFile} 
-          currentImage={uploadedFile}
+          onUpload={setUploadedFiles} 
+          currentImages={uploadedFiles}
         />
 
         {/* Controls Section */}
@@ -159,6 +181,12 @@ function App() {
           
             <div className="space-y-6">
                
+               {/* Expression Selector */}
+               <ExpressionSelector 
+                 selectedExpression={advancedSettings.expression}
+                 onSelect={(expression) => setAdvancedSettings({ ...advancedSettings, expression })}
+               />
+
                {/* Year Selector (Pedagogical) + Pro Controls */}
                <div className="pt-4">
                  <YearSelector 
@@ -204,11 +232,11 @@ function App() {
           {/* Generate Button */}
           <button
             onClick={handleGenerate}
-            disabled={isGenerating || !uploadedFile}
+            disabled={isGenerating || uploadedFiles.length === 0}
             className={`
               w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all transform active:scale-[0.99]
               flex items-center justify-center gap-3
-              ${isGenerating || !uploadedFile 
+              ${isGenerating || uploadedFiles.length === 0
                 ? 'bg-dark-700 text-gray-500 cursor-not-allowed' 
                 : 'bg-gradient-to-r from-lemon-400 to-lemon-600 text-black hover:from-lemon-300 hover:to-lemon-500 shadow-lemon-500/20'
               }
@@ -241,6 +269,11 @@ function App() {
           onClose={() => setResult(null)}
           onDownload={handleDownload}
         />
+      )}
+
+      {/* Gallery Modal */}
+      {showGallery && (
+        <GalleryModal onClose={() => setShowGallery(false)} />
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { STYLES, CATEGORIES } from '../constants';
 
 interface Props {
@@ -13,7 +13,15 @@ const CATEGORY_CONFIG: Record<string, { icon: string; shortLabel: string }> = {
   "Futuristic & Cyber": { icon: "🤖", shortLabel: "Cyber" },
   "Pop Culture & Fun": { icon: "🕹️", shortLabel: "Pop Culture" },
   "Rockstar & Rebellion": { icon: "🎸", shortLabel: "Rockstar" },
-  "Animal Kingdom": { icon: "🐾", shortLabel: "Animals" }
+  "Animal Kingdom": { icon: "🐾", shortLabel: "Animals" },
+  "Nature": { icon: "🌿", shortLabel: "Nature" },
+  "Space": { icon: "🚀", shortLabel: "Space" },
+  "Sports": { icon: "⚽", shortLabel: "Sports" },
+  "Music": { icon: "🎵", shortLabel: "Music" },
+  "Fantasy": { icon: "🧙", shortLabel: "Fantasy" },
+  "Seasons": { icon: "🍂", shortLabel: "Seasons" },
+  "Travel": { icon: "✈️", shortLabel: "Travel" },
+  "Food": { icon: "🍋", shortLabel: "Food" }
 };
 
 type SortOption = 'default' | 'fun_desc' | 'fun_asc';
@@ -22,6 +30,8 @@ const StyleGrid: React.FC<Props> = ({ selectedId, onSelect }) => {
   const [activeCategory, setActiveCategory] = useState<string>(CATEGORIES[0]);
   const [isMixedMode, setIsMixedMode] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('default');
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const filteredStyles = useMemo(() => {
@@ -55,13 +65,62 @@ const StyleGrid: React.FC<Props> = ({ selectedId, onSelect }) => {
     setActiveCategory('Mixed');
   };
 
+  const checkScrollButtons = () => {
+    if (!scrollContainerRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+  };
+
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+      setTimeout(checkScrollButtons, 100);
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+      setTimeout(checkScrollButtons, 100);
+    }
+  };
+
+  // Check scroll buttons on mount and when categories change
+  useEffect(() => {
+    checkScrollButtons();
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScrollButtons);
+      window.addEventListener('resize', checkScrollButtons);
+      return () => {
+        container.removeEventListener('scroll', checkScrollButtons);
+        window.removeEventListener('resize', checkScrollButtons);
+      };
+    }
+  }, [activeCategory, isMixedMode]);
+
   return (
     <div className="space-y-6">
         {/* Segmented Category Selector */}
         <div className="relative group/scroll">
+            {/* Left Scroll Button */}
+            {canScrollLeft && (
+              <button
+                onClick={scrollLeft}
+                className="absolute left-0 top-0 bottom-2 z-10 bg-dark-900/90 hover:bg-dark-800 border border-dark-700 rounded-l-xl px-3 py-3 flex items-center justify-center transition-all backdrop-blur-sm"
+                aria-label="Scroll left"
+              >
+                <svg className="w-5 h-5 text-lemon-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+            
             <div 
                 ref={scrollContainerRef}
                 className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide no-scrollbar mask-linear-fade scroll-smooth"
+                style={{ paddingLeft: canScrollLeft ? '40px' : '0', paddingRight: canScrollRight ? '40px' : '0' }}
             >
                 {CATEGORIES.map(category => {
                     const config = CATEGORY_CONFIG[category];
@@ -112,6 +171,19 @@ const StyleGrid: React.FC<Props> = ({ selectedId, onSelect }) => {
                     )}
                 </button>
             </div>
+            
+            {/* Right Scroll Button */}
+            {canScrollRight && (
+              <button
+                onClick={scrollRight}
+                className="absolute right-0 top-0 bottom-2 z-10 bg-dark-900/90 hover:bg-dark-800 border border-dark-700 rounded-r-xl px-3 py-3 flex items-center justify-center transition-all backdrop-blur-sm"
+                aria-label="Scroll right"
+              >
+                <svg className="w-5 h-5 text-lemon-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
             
             {/* Scroll Fade Indicators (Visual hint only) */}
             <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-dark-900 to-transparent pointer-events-none md:hidden"></div>

@@ -27,10 +27,26 @@ export interface CameraGear {
   lighting: string;
 }
 
+export type ExpressionOption = 
+  | 'neutral' 
+  | 'soft_smile' 
+  | 'full_smile' 
+  | 'confident' 
+  | 'relaxed' 
+  | 'approachable' 
+  | 'focused' 
+  | 'thoughtful' 
+  | 'friendly' 
+  | 'serious' 
+  | 'energetic' 
+  | 'calm';
+
 export interface AdvancedSettings {
   angle: string;
+  camera: string; // Added camera field
   lens: string;
   aperture: string;
   lighting: string;
   filmStock: string;
+  expression: ExpressionOption;
 }

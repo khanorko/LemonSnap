@@ -171,9 +171,24 @@ const YearSelector: React.FC<Props> = ({ year, onChange, advancedSettings, onAdv
                     <div className="flex items-start gap-3 group">
                         <span className="text-lemon-700 text-base">📷</span>
                         <div className="flex-1">
-                            <span className="text-xs font-bold block text-lemon-900">{eraGear.camera}</span>
+                            <span className={`text-xs font-bold block transition-colors ${isOverridden('camera') ? 'text-purple-600' : 'text-lemon-900'}`}>
+                                {eraGear.camera}
+                            </span>
                             <span className="text-[10px] text-lemon-700/70 block">Camera Body</span>
                         </div>
+                        {showProSettings && ADVANCED_OPTIONS.cameras && (
+                            <div className="w-32">
+                                <select 
+                                    value={advancedSettings.camera || 'default'}
+                                    onChange={(e) => handleSettingChange('camera', e.target.value)}
+                                    className="w-full text-[10px] bg-white border border-lemon-200 rounded p-1 text-lemon-900 outline-none focus:border-lemon-400"
+                                >
+                                    {ADVANCED_OPTIONS.cameras.map(opt => (
+                                        <option key={opt.value} value={opt.value}>{opt.label.split(' (')[0]}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                     </div>
                     
                     {/* Film/Sensor or ISO setting */}
