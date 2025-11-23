@@ -231,41 +231,35 @@ export const buildPrompt = (stylePrompt: string, year: number = 2025, advanced?:
     }
   }
   
-  // Detect if this is a transformation style (Animal Kingdom or contains transformation keywords)
-  const isTransformationStyle = expandedStyleLower.includes('anthropomorphic') || 
-                                expandedStyleLower.includes('transformation') ||
-                                expandedStyleLower.includes('hybrid') ||
+  // Detect if this is a transformation/thematic style
+  const isTransformationStyle = expandedStyleLower.includes('animal') ||
+                                expandedStyleLower.includes('panther') ||
+                                expandedStyleLower.includes('lion') ||
+                                expandedStyleLower.includes('wolf') ||
+                                expandedStyleLower.includes('fox') ||
+                                expandedStyleLower.includes('tiger') ||
+                                expandedStyleLower.includes('raven') ||
                                 expandedStyleLower.includes('creature') ||
-                                expandedStyleLower.includes('beast') ||
-                                expandedStyleLower.includes('maintain subject') ||
-                                expandedStyleLower.includes('maintain identity') ||
-                                expandedStyleLower.includes('wolf form') ||
-                                expandedStyleLower.includes('animal features') ||
+                                expandedStyleLower.includes('hybrid') ||
                                 expandedStyleLower.includes('feline') ||
-                                expandedStyleLower.includes('lion features') ||
-                                expandedStyleLower.includes('panther features') ||
-                                expandedStyleLower.includes('fox features');
+                                expandedStyleLower.includes('aquatic') ||
+                                expandedStyleLower.includes('mythic') ||
+                                expandedStyleLower.includes('fantasy') ||
+                                expandedStyleLower.includes('transformation');
   
-  // PROMPT STRATEGY: Explicit Safety Context
+  // PROMPT STRATEGY: Explicit Safety Context & Artistic Interpretation
   let instructionSection = '';
   if (isTransformationStyle) {
-    // For transformation styles, emphasize maintaining human features with subtle animal enhancements
     instructionSection = `
-  IDENTITY PRESERVATION (CRITICAL):
-  - KEEP THE HUMAN FACE AS THE PRIMARY FEATURE - the person must look clearly human.
-  - Maintain the subject's unique facial structure, bone structure, and recognizable features.
-  - Preserve the original person's identity - they must be recognizable as the same individual.
-  - Keep the same facial proportions, eye shape, nose structure, mouth, and overall human face shape.
-  - The person's human face should remain the dominant feature - animal elements are subtle enhancements.
-  - Subject Expression: ${expressionStr}
-  
-  TRANSFORMATION INSTRUCTIONS (ANTHROPOMORPHIC - HUMAN-FIRST):
-  - The person must retain their HUMAN FACE - do not replace it with an animal head.
-  - Add animal features as subtle enhancements: small animal ears on top of head, slight fur texture on skin, animal-like eye color/shape, but keep the human facial structure.
-  - The transformation should be anthropomorphic (human with animal traits), NOT a full animal transformation.
-  - Maintain the same human head shape, jawline, and facial bone structure from the original image.
-  - Animal features should complement the human face, not dominate it.
-  - The result should look like a human with animal characteristics, not an animal with human characteristics.`;
+  CREATIVE ARTISTIC INTERPRETATION (THEMATIC COSTUME & MAKEUP):
+  - Apply the visual style as an ARTISTIC INTERPRETATION using makeup, costume, and lighting.
+  - The subject must remain a HUMAN using thematic styling, NOT a biological hybrid.
+  - Use thematic elements (e.g., face paint, hair styling, accessories) to convey the animal/creature theme.
+  - KEEP THE HUMAN FACE AS THE PRIMARY FEATURE.
+  - Maintain the subject's unique facial structure and identity completely.
+  - Do not morph the facial bone structure into an animal muzzle or snout.
+  - The result should look like a high-fashion editorial shoot with thematic styling.
+  - Subject Expression: ${expressionStr}`;
   } else {
     // For regular styles, keep the original instructions
     instructionSection = `
