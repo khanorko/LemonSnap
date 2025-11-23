@@ -2,7 +2,7 @@ import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import { CameraGear, AdvancedSettings } from '../types';
 import { PROMPT_CONFIG, EXPRESSION_PRESETS } from '../constants';
 
-export const getCameraGear = (year: number, advanced?: AdvancedSettings): CameraGear => {
+export const getCameraGear = (year: number, advanced?: AdvancedSettings, stylePrompt: string = ''): CameraGear => {
   // Default Modern Setup
   let gear: CameraGear = { 
     camera: "Canon EOS R5", 
@@ -89,6 +89,18 @@ export const getCameraGear = (year: number, advanced?: AdvancedSettings): Camera
 
   // Apply advanced overrides if they are not 'default'
   if (advanced) {
+    // Force high-end gear for professional styles if camera is default
+    const isProfessional = stylePrompt.toLowerCase().includes('professional') || 
+                          stylePrompt.toLowerCase().includes('executive') || 
+                          stylePrompt.toLowerCase().includes('studio') ||
+                          stylePrompt.toLowerCase().includes('editorial');
+
+    if (isProfessional && advanced.camera === 'default') {
+         gear.camera = "Hasselblad H6D-100c (Medium Format)";
+         gear.lens = "Hasselblad HC 100mm f/2.2";
+         gear.iso = "ISO 64 (Ultra Clean)";
+    }
+
     if (advanced.camera && advanced.camera !== 'default') {
         switch(advanced.camera) {
             case 'hasselblad': gear.camera = "Hasselblad 503CW (Medium Format)"; break;
@@ -123,7 +135,7 @@ export const getCameraGear = (year: number, advanced?: AdvancedSettings): Camera
 };
 
 export const buildPrompt = (stylePrompt: string, year: number = 2025, advanced?: AdvancedSettings, multiImage?: boolean): string => {
-  const gear = getCameraGear(year, advanced);
+  const gear = getCameraGear(year, advanced, stylePrompt);
   
   // Determine angle string
   let angleStr = "Best angle for feature visibility";

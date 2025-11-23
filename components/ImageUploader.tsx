@@ -136,7 +136,7 @@ const ImageUploader: React.FC<Props> = ({ onUpload, currentImages }) => {
           {/* Side Images Column */}
           <div className="w-full md:w-1/3 flex flex-row md:flex-col gap-4 h-96">
              {/* Slot 2 */}
-             <div className="relative w-full h-1/2 rounded-xl border-2 border-dashed border-gray-700 bg-dark-800 overflow-hidden hover:border-gray-500 transition-colors">
+             <div className="relative w-full flex-1 rounded-xl border-2 border-dashed border-gray-700 bg-dark-800 overflow-hidden hover:border-gray-500 transition-colors">
                  {previewUrls[1] ? (
                      <div className="w-full h-full relative group cursor-pointer" onClick={() => triggerFileInput(1)}>
                         <img src={previewUrls[1]} alt="Angle 1" className="w-full h-full object-cover" />
@@ -162,7 +162,7 @@ const ImageUploader: React.FC<Props> = ({ onUpload, currentImages }) => {
              </div>
 
              {/* Slot 3 */}
-             <div className="relative w-full h-1/2 rounded-xl border-2 border-dashed border-gray-700 bg-dark-800 overflow-hidden hover:border-gray-500 transition-colors">
+             <div className="relative w-full flex-1 rounded-xl border-2 border-dashed border-gray-700 bg-dark-800 overflow-hidden hover:border-gray-500 transition-colors">
                  {previewUrls[2] ? (
                      <div className="w-full h-full relative group cursor-pointer" onClick={() => triggerFileInput(2)}>
                         <img src={previewUrls[2]} alt="Angle 2" className="w-full h-full object-cover" />

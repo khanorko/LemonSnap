@@ -8,17 +8,33 @@ interface Props {
 }
 
 const ResultModal: React.FC<Props> = ({ imageUrl, styleTitle, onClose, onDownload }) => {
+  const [imgError, setImgError] = React.useState(false);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
       <div className="bg-dark-800 border border-dark-700 rounded-2xl max-w-4xl w-full overflow-hidden flex flex-col md:flex-row shadow-2xl">
         
         {/* Image Section */}
-        <div className="w-full md:w-2/3 bg-black flex items-center justify-center relative group">
+        <div className="w-full md:w-2/3 bg-black flex items-center justify-center relative group min-h-[400px]">
            {/* Chequerboard pattern for transparency feeling if needed, though usually opaque */}
            <div className="absolute inset-0 opacity-20" 
                 style={{backgroundImage: 'radial-gradient(#333 1px, transparent 1px)', backgroundSize: '20px 20px'}}>
            </div>
-           <img src={imageUrl} alt="Generated Result" className="max-h-[70vh] md:max-h-[80vh] object-contain z-10" />
+           
+           {imgError ? (
+               <div className="z-10 text-center p-8 text-gray-400">
+                   <svg className="w-12 h-12 mx-auto mb-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                   <p>Failed to display image.</p>
+                   <p className="text-xs mt-2">The image data might be corrupted or too large.</p>
+               </div>
+           ) : (
+               <img 
+                src={imageUrl} 
+                alt="Generated Result" 
+                className="max-h-[70vh] md:max-h-[80vh] object-contain z-10" 
+                onError={() => setImgError(true)}
+               />
+           )}
            
            <div className="absolute top-4 left-4 z-20">
              <span className="px-3 py-1 bg-black/60 backdrop-blur text-white text-xs font-bold rounded-full border border-white/10">
