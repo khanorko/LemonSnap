@@ -1,5 +1,5 @@
-// Modified storage service to use Backend API instead of direct S3 calls
-const BACKEND_URL = 'http://localhost:3001/api';
+// Storage service - uses /api routes (works on Vercel and localhost)
+const BACKEND_URL = '/api';
 
 export interface GalleryImage {
   key: string;
