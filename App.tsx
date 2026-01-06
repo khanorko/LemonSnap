@@ -82,7 +82,6 @@ function App() {
           console.log("Image saved to gallery:", filename);
       } catch (uploadErr) {
           console.error("Failed to save to gallery:", uploadErr);
-          // Don't block the UI, just log the error
       }
 
       setResult({
