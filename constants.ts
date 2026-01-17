@@ -28,7 +28,7 @@ export const EXPRESSION_PRESETS: { id: ExpressionOption; label: string; icon: st
   { id: 'focused', label: 'Focused', icon: '🧐' },
   { id: 'thoughtful', label: 'Thinking', icon: '🤔' },
   { id: 'friendly', label: 'Friendly', icon: '😊' },
-  { id: 'serious', label: 'Serious', icon: '😐' },
+  { id: 'serious', label: 'Serious', icon: '😑' },
   { id: 'energetic', label: 'Energetic', icon: '🤩' },
   { id: 'calm', label: 'Calm', icon: '🍃' },
 ];
