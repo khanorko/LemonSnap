@@ -48,7 +48,11 @@ const ResultModal: React.FC<Props> = ({ imageUrl, styleTitle, onClose, onDownloa
           <div>
             <div className="flex justify-between items-start mb-6">
                 <h2 className="text-2xl font-bold text-white">Your Headshot</h2>
-                <button onClick={onClose} className="text-gray-400 hover:text-white">
+                <button
+                    onClick={onClose}
+                    className="text-gray-400 hover:text-white"
+                    aria-label="Close modal"
+                >
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -78,19 +82,23 @@ const ResultModal: React.FC<Props> = ({ imageUrl, styleTitle, onClose, onDownloa
           </div>
 
           <div className="space-y-3">
-            <button 
+            <button
                 onClick={() => onDownload(true)}
                 className="w-full py-4 bg-gradient-to-r from-lemon-400 to-lemon-500 hover:from-lemon-300 hover:to-lemon-400 text-black font-bold rounded-xl shadow-lg shadow-lemon-500/20 transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                aria-label="Download high resolution image"
             >
-                <span>Unlock & Download</span>
-                <span className="bg-black/10 px-2 py-0.5 rounded text-xs">$4.99</span>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Download HD</span>
             </button>
-            
-            <button 
+
+            <button
                 onClick={() => onDownload(false)}
                 className="w-full py-3 bg-dark-700 hover:bg-dark-600 text-gray-300 font-medium rounded-xl transition-all text-sm flex items-center justify-center gap-2"
+                aria-label="Download standard resolution image"
             >
-                <span>Free Watermarked Preview</span>
+                <span>Download Preview</span>
             </button>
           </div>
         </div>

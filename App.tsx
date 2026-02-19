@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import ImageUploader from './components/ImageUploader';
 import StyleGrid from './components/StyleGrid';
 import YearSelector from './components/YearSelector';
 import ExpressionSelector from './components/ExpressionSelector';
 import ResultModal from './components/ResultModal';
 import GalleryModal from './components/GalleryModal';
+import { ToastContainer, ToastMessage } from './components/Toast';
 import { STYLES } from './constants';
 import { generateHeadshot, buildPrompt } from './services/gemini';
 import { GeneratedResult, AppMode, AdvancedSettings } from './types';
@@ -20,7 +21,17 @@ function App() {
   const [result, setResult] = useState<GeneratedResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const showToast = useCallback((message: string, type: ToastMessage['type'] = 'info') => {
+    const id = Date.now().toString();
+    setToasts((prev) => [...prev, { id, message, type }]);
+  }, []);
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
   // Advanced Settings State
   const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
     angle: 'default',
@@ -33,7 +44,7 @@ function App() {
   });
 
   const handleMagicEditorClick = () => {
-    alert("Magic Editor is currently in beta testing and will be available in the next update! 🍋");
+    showToast("Magic Editor is coming soon! Stay tuned for the next update.", 'info');
   };
 
   // Calculate Live Prompt
@@ -79,9 +90,8 @@ function App() {
           const blob = dataURLToBlob(imageUrl);
           const filename = `headshot_${Date.now()}_${style.id}.png`;
           await uploadHeadshot(blob, filename);
-          console.log("Image saved to gallery:", filename);
       } catch (uploadErr) {
-          console.error("Failed to save to gallery:", uploadErr);
+          showToast("Image generated but couldn't save to gallery", 'warning');
       }
 
       setResult({
@@ -112,7 +122,7 @@ function App() {
     document.body.removeChild(link);
     
     if (isPaid) {
-        alert("Thank you for your purchase! (Mock Payment)");
+        showToast("Thank you for your purchase!", 'success');
     }
   };
 
@@ -126,9 +136,10 @@ function App() {
             <span className="font-bold text-xl tracking-tight"><span className="text-white">Lemon</span><span className="text-lemon-400">Snap</span></span>
           </div>
           <div className="flex items-center gap-4">
-             <button 
+             <button
                onClick={() => setShowGallery(true)}
                className="text-sm text-gray-400 hover:text-white transition-colors"
+               aria-label="Open my gallery"
              >
                My Gallery
              </button>
@@ -214,9 +225,10 @@ function App() {
           <div className="bg-dark-800 border border-dark-700 rounded-xl overflow-hidden">
               <div className="px-4 py-2 bg-dark-900/50 border-b border-dark-700 flex items-center justify-between">
                   <span className="text-xs font-bold text-lemon-400 uppercase tracking-wider">Final Prompt (For Testing)</span>
-                  <button 
+                  <button
                       onClick={handleCopyPrompt}
                       className="text-xs bg-dark-700 hover:bg-dark-600 text-white px-2 py-1 rounded transition-colors flex items-center gap-1"
+                      aria-label={copied ? 'Prompt copied to clipboard' : 'Copy prompt to clipboard'}
                   >
                       {copied ? 'Copied!' : 'Copy Text'}
                   </button>
@@ -274,6 +286,9 @@ function App() {
       {showGallery && (
         <GalleryModal onClose={() => setShowGallery(false)} />
       )}
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
